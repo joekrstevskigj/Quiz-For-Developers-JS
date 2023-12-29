@@ -4,6 +4,11 @@ const questionsSection = {
     "title": document.querySelector("#question-title"),
     "choices": document.querySelector("#choices")
 }
+//same, for the result elements
+const resultSection = {
+    "container": document.querySelector("#divResult"),
+    "result": document.querySelector("#result")
+};
 const qToPlay = getQuestions();
 let correctAnswer = -1;
 
@@ -32,23 +37,25 @@ const createChoiceChildren = (parent, choices) => {
 const onClickChoice = (e) => {
     const index = parseInt(e.currentTarget.dataset.index);
 
-    if(index === correctAnswer)
-    {
-        //true
-        alert("yes");
-    }else{
-        //guessed wrong
-        alert("no!");
-    }
+    showResultToQuestion(index === correctAnswer);
 
     displayNextQuestion();
+}
+
+//show result of the user choise
+const showResultToQuestion = (isCorrect = false) => {
+    resultSection.container.classList.toggle("hide");
+    resultSection.result.textContent = isCorrect ? "Correct!" : "Wrong!";
+    setTimeout(() => resultSection.container.classList.toggle("hide"), 1500);
 }
 
 //get the next question and display it.
 const displayNextQuestion = () => {
     const nextQuestion = qToPlay.length > 0 ? qToPlay.pop() : null;
+    
+    //if no more questions, then the game is finished
     if (nextQuestion === null) {
-        //that's it, game's over, show the results
+        showEndGameScreen();
         return;
     }
 
@@ -57,6 +64,19 @@ const displayNextQuestion = () => {
     questionsSection.title.textContent = nextQuestion.title;
     createChoiceChildren(questionsSection.choices, nextQuestion.answers);
 };
+
+//end game, either the timer runs up or questions are finished
+const showEndGameScreen = () => {
+    questionsSection.container.classList.toggle("hide");//hide the question elements
+    //show the submiit high score
+    document.querySelector("#end-screen").classList.toggle("hide");
+
+    //for submit, we don't need the remove event listener since we are going to new page
+    document.querySelector("#submit").addEventListener("click", ()=> {
+        //TODO: save initial and result to local storage using stringify
+        window.location.href = "./highscores.html";
+    });
+}
 
 //event handler for starting the game.
 const onClickStartButton = (e) => {

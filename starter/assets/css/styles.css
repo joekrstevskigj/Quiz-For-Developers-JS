@@ -86,3 +86,12 @@ li:nth-child(odd) {
   top: 10px;
   right: 10px;
 }
+
+#divResult{
+  width: 100%;
+  border-top: rgba(122, 110, 116, 0.67) solid 4px;
+  margin-top: 5%;
+  padding-top: 15px;
+  color:  rgba(122, 110, 116, 0.67);
+  font-size: 2em;
+}
