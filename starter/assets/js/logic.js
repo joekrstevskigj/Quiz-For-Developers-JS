@@ -9,11 +9,21 @@ const resultSection = {
     "container": document.querySelector("#divResult"),
     "result": document.querySelector("#result")
 };
-const qToPlay = getQuestions();
-let correctAnswer = -1;
+//timer display
+const timeDisplay = document.querySelector("#time");
+//display final score
+const scoreDisplay = document.querySelector("#final-score");
 
-//this resets the elements that holds the elements to empty, so it can host next 
-//question.
+//declare vars to be used troughout
+const qToPlay = getQuestions();
+let correctAnswer = -1, timeLeft = 0, timerID = 0, score = 0;
+
+//set the timer 10 seconds for each question. There can be different number of questions
+//avalible, so this way we are keeping it about the same difficulty per number of questions
+timeLeft = 10 * qToPlay.length;
+
+//removes all children from the parent container which hosts the questions,so it can
+//be populated with new ones
 const resetQuesionDisplay = (display) => {
     display.title.textContent = "";
 
@@ -22,6 +32,7 @@ const resetQuesionDisplay = (display) => {
     }
 }
 
+//adds the question and it's choices
 const createChoiceChildren = (parent, choices) => {
     for (let i = 0; i < choices.length; i++) {
         const choice = document.createElement("button");
@@ -45,14 +56,31 @@ const onClickChoice = (e) => {
 //show result of the user choise
 const showResultToQuestion = (isCorrect = false) => {
     resultSection.container.classList.toggle("hide");
-    resultSection.result.textContent = isCorrect ? "Correct!" : "Wrong!";
+
+    if (isCorrect) {
+        resultSection.result.textContent = "Correct!"
+        score += 10;
+    } else {
+        resultSection.result.textContent = "Wrong!";
+        timeLeft -= 10;
+        //give feedback to user right away that the timer goes down
+        timeDisplay.textContent = timeLeft.toString();
+
+        if (timeLeft <= 0) {
+            timeDisplay.textContent = "0";
+            showEndGameScreen();
+            return;
+        }
+
+    }
+
     setTimeout(() => resultSection.container.classList.toggle("hide"), 1500);
 }
 
 //get the next question and display it.
 const displayNextQuestion = () => {
     const nextQuestion = qToPlay.length > 0 ? qToPlay.pop() : null;
-    
+
     //if no more questions, then the game is finished
     if (nextQuestion === null) {
         showEndGameScreen();
@@ -67,15 +95,29 @@ const displayNextQuestion = () => {
 
 //end game, either the timer runs up or questions are finished
 const showEndGameScreen = () => {
+    clearInterval(timerID); //stop the timer
+
+    //display the score
+    scoreDisplay.textContent = score.toString();
+
     questionsSection.container.classList.toggle("hide");//hide the question elements
     //show the submiit high score
     document.querySelector("#end-screen").classList.toggle("hide");
 
     //for submit, we don't need the remove event listener since we are going to new page
-    document.querySelector("#submit").addEventListener("click", ()=> {
+    document.querySelector("#submit").addEventListener("click", () => {
         //TODO: save initial and result to local storage using stringify
         window.location.href = "./highscores.html";
     });
+}
+
+//it's called every second by setInterval
+const timerControl = () => {
+    timeLeft--;
+    timeDisplay.textContent = timeLeft.toString();
+    if (timeLeft <= 0) {
+        showEndGameScreen();
+    }
 }
 
 //event handler for starting the game.
@@ -89,10 +131,16 @@ const onClickStartButton = (e) => {
     //show the section with the questions
     questionsSection.container.classList.toggle("hide");
 
+    //set the ticking timer for one second, and keep his id so we can stop it when not neede anymore
+    timerID = setInterval(timerControl, 1000);
+
     displayNextQuestion();
 };
 
 const init = () => {
+    //display current total time
+    timeDisplay.textContent = timeLeft.toString();
+
     document.querySelector("#start").addEventListener("click", onClickStartButton);
 };
 
