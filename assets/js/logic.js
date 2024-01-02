@@ -14,6 +14,10 @@ const timeDisplay = document.querySelector("#time");
 //display final score
 const scoreDisplay = document.querySelector("#final-score");
 
+//create sound files
+let soundCorrect = new Audio("./assets/sfx/correct.wav");
+let soundWrong = new Audio("./assets/sfx/incorrect.wav");
+
 //declare vars to be used troughout
 const qToPlay = getQuestions();
 let correctAnswer = -1, timeLeft = 0, timerID = 0, score = 0;
@@ -62,9 +66,11 @@ const showResultToQuestion = (isCorrect = false) => {
     if (isCorrect) {
         resultSection.result.textContent = "Correct!"
         score += 10;
+        soundCorrect.play();
     } else {
         resultSection.result.textContent = "Wrong!";
         timeLeft -= 10;
+        soundWrong.play();
         //give feedback to user right away that the timer goes down
         timeDisplay.textContent = timeLeft.toString();
 
