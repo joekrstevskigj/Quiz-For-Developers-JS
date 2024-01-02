@@ -48,14 +48,16 @@ const createChoiceChildren = (parent, choices) => {
 const onClickChoice = (e) => {
     const index = parseInt(e.currentTarget.dataset.index);
 
-    showResultToQuestion(index === correctAnswer);
-
-    displayNextQuestion();
+    //showResultToQuestion returns true if the game is not over yet
+    //if the time has run out, then no need for next question, already it went to end screen.
+    if(showResultToQuestion(index === correctAnswer)) displayNextQuestion();
 }
 
 //show result of the user choise
 const showResultToQuestion = (isCorrect = false) => {
     resultSection.container.classList.toggle("hide");
+
+    setTimeout(() => resultSection.container.classList.toggle("hide"), 1500);
 
     if (isCorrect) {
         resultSection.result.textContent = "Correct!"
@@ -69,12 +71,10 @@ const showResultToQuestion = (isCorrect = false) => {
         if (timeLeft <= 0) {
             timeDisplay.textContent = "0";
             showEndGameScreen();
-            return;
+            return false;
         }
-
     }
-
-    setTimeout(() => resultSection.container.classList.toggle("hide"), 1500);
+    return true;
 }
 
 //get the next question and display it.
@@ -106,7 +106,12 @@ const showEndGameScreen = () => {
 
     //for submit, we don't need the remove event listener since we are going to new page
     document.querySelector("#submit").addEventListener("click", () => {
-        //TODO: save initial and result to local storage using stringify
+        //get an instance of the local storage, if exsists, if not create new
+        let local = JSON.parse(localStorage.getItem("highscoresQuiz")) ?? {};
+        local[document.querySelector("#initials").value.toString()] = score.toString();
+
+        //now, convert back to string so we can save the score and displayed it on the next screen
+        localStorage.setItem("highscoresQuiz", JSON.stringify(local));
         window.location.href = "./highscores.html";
     });
 }
